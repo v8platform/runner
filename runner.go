@@ -15,13 +15,13 @@ var defaultVersion = "8.3"
 
 type v8Runner struct {
 	Options   *Options
-	Where     types.InfoBase
-	What      types.Command
+	Where     Infobase
+	What      Command
 	ctx       context.Context
 	commandV8 string
 }
 
-func newRunner(ctx context.Context, where types.InfoBase, what types.Command, opts ...interface{}) v8Runner {
+func newRunner(ctx context.Context, where Infobase, what Command, opts ...interface{}) v8Runner {
 
 	options := defaultOptions()
 
@@ -44,7 +44,7 @@ func newRunner(ctx context.Context, where types.InfoBase, what types.Command, op
 	return r
 }
 
-func Run(where types.InfoBase, what types.Command, opts ...interface{}) error {
+func Run(where Infobase, what Command, opts ...interface{}) error {
 
 	ctx := context.Background()
 
@@ -57,7 +57,7 @@ func Run(where types.InfoBase, what types.Command, opts ...interface{}) error {
 	return <-p.Wait()
 }
 
-func Background(ctx context.Context, where types.InfoBase, what types.Command, opts ...interface{}) (Process, error) {
+func Background(ctx context.Context, where Infobase, what Command, opts ...interface{}) (Process, error) {
 
 	r := newRunner(ctx, where, what, opts...)
 
@@ -91,12 +91,12 @@ func (r *v8Runner) run() Process {
 
 }
 
-func checkCommand(what types.Command) (err error) {
+func checkCommand(what Command) (err error) {
 	err = what.Check()
 	return
 }
 
-func getCmdArgs(where types.InfoBase, what types.Command, options Options) []string {
+func getCmdArgs(where Infobase, what Command, options Options) []string {
 
 	var args []string
 
