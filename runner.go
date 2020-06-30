@@ -149,7 +149,7 @@ func getCmdArgs(where Infobase, what Command, options Options) []string {
 	}
 
 	params.Append(options.commonValues...)
-	params.Append(options.customValues...)
+	params.Append(options.Values()...)
 
 	return params.Values()
 }
