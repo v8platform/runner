@@ -1,15 +1,16 @@
 package runner
 
 import (
-	"fmt"
-	"github.com/khorevaa/go-v8platform/find"
-	"github.com/khorevaa/go-v8platform/runner/cmd"
-	"github.com/khorevaa/go-v8platform/types"
+	"github.com/khorevaa/go-v8platform/errors"
+	"github.com/v8platform/find"
+	"github.com/v8platform/runner/cmd"
 	"strings"
 
 	"context"
-	"github.com/khorevaa/go-v8platform/errors"
+	//"github.com/khorevaa/v8platform/errors"
 )
+
+const CreateInfobase = "CREATEINFOBASE"
 
 var defaultVersion = "8.3"
 
@@ -96,36 +97,61 @@ func checkCommand(what Command) (err error) {
 	return
 }
 
+func isCreateInfobase(what Command) bool {
+
+	return strings.EqualFold(strings.ToUpper(what.Command()), CreateInfobase)
+
+}
+
+func getConnectionsStringParams(values []string) (params []string, additional []string) {
+
+	for _, value := range values {
+
+		if strings.HasPrefix(value, "/") || strings.HasPrefix(value, "-") {
+			additional = append(additional, value)
+		} else {
+			params = append(params, value)
+		}
+	}
+
+	return
+}
+
+func joinConnectionStringParams(whereParams, whatParams []string) string {
+
+	// TODO Сделать поиск одинаковых параметров
+	params := append(whereParams, whatParams...)
+	return strings.Join(params, ";")
+}
+
 func getCmdArgs(where Infobase, what Command, options Options) []string {
 
-	var args []string
+	params := &Params{
+		values: []string{what.Command()},
+	}
 
-	values := types.NewValues()
+	if isCreateInfobase(what) {
 
-	connectString := where.Values()
+		whereParams, whereValues := getConnectionsStringParams(where.Values())
+		whatParams, whatValues := getConnectionsStringParams(what.Values())
 
-	if what.Command() == types.COMMAND_CREATEINFOBASE {
-		connectString.Append(*what.Values())
+		connectionString := joinConnectionStringParams(whatParams, whereParams)
+
+		params.Append(connectionString)
+		params.Append(whatValues...)
+		params.Append(whereValues...)
+
 	} else {
-		values.Set("/IBConnectionString", types.SpaceSep,
-			fmt.Sprintf("%s;", strings.Join(connectString.Values(), ";")))
-		values.Append(*what.Values())
+
+		params.Append(where.ConnectionString())
+		params.Append(what.Values()...)
+
 	}
 
-	values.Append(options.commonValues)
-	values.Append(*options.Values())
-	values.Append(options.customValues)
+	params.Append(options.commonValues...)
+	params.Append(options.customValues...)
 
-	args = append(args, what.Command())
-	if what.Command() == types.COMMAND_CREATEINFOBASE {
-
-		args = append(args, strings.Join(connectString.Values(), ";"))
-
-		clearValuesForCreateInfobase(values)
-	}
-	args = append(args, values.Values()...)
-
-	return args
+	return params.Values()
 }
 
 func prepareRunner(ctx context.Context, command string, args []string, options Options) Runner {
@@ -164,12 +190,6 @@ func getV8Path(options Options) (string, error) {
 	}
 
 	return v8path, nil
-
-}
-
-func clearValuesForCreateInfobase(v *types.Values) {
-
-	// TODO Сделать очистку значение
 
 }
 

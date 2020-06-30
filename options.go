@@ -2,7 +2,7 @@ package runner
 
 import (
 	"context"
-	"github.com/khorevaa/go-v8platform/types"
+	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -19,8 +19,8 @@ type Options struct {
 	tempDumpResult bool
 	v8path         string
 	Context        context.Context
-	commonValues   types.Values
-	customValues   types.Values
+	customValues   []string
+	commonValues   []string
 }
 
 func (ro *Options) Option(fn Option) {
@@ -29,11 +29,9 @@ func (ro *Options) Option(fn Option) {
 
 }
 
-func (ro *Options) setCustomValue(key string, sep types.ValueSep, value string) {
+func (ro *Options) setCustomValue(key, sep, value string) {
 
-	cm := &ro.customValues
-	cm.Set(key, sep, value)
-	ro.customValues = *cm
+	ro.customValues = append(ro.customValues, fmt.Sprintf("%s%s%s", key, sep, value))
 
 }
 
@@ -45,18 +43,17 @@ func (ro *Options) Options(opts ...Option) {
 
 }
 
-func (ro Options) Values() *types.Values {
-	values := types.NewValues()
+func (ro Options) Values() []string {
 
 	outValue := ro.Out
 	if ro.NoTruncate {
 		outValue += " -NoTruncate"
 	}
 
-	values.Set("/Out", types.SpaceSep, outValue)
-	values.Set("/DumpResult", types.SpaceSep, ro.DumpResult)
+	ro.setCustomValue("/Out", " ", outValue)
+	ro.setCustomValue("/DumpResult", " ", ro.DumpResult)
 
-	return values
+	return ro.customValues
 }
 
 func (ro *Options) NewOutFile() {
@@ -148,9 +145,9 @@ func WithVersion(version string) Option {
 	}
 }
 
-func WithCommonValues(cv types.ValuesInterface) Option {
+func WithCommonValues(cv []string) Option {
 	return func(r *Options) {
-		r.commonValues = *cv.Values()
+		r.commonValues = cv
 	}
 }
 
@@ -162,10 +159,10 @@ func WithCredentials(user, password string) Option {
 			return
 		}
 
-		r.setCustomValue("/U", types.SpaceSep, user)
+		r.setCustomValue("/U", " ", user)
 
 		if len(password) > 0 {
-			r.setCustomValue("/P", types.SpaceSep, password)
+			r.setCustomValue("/P", " ", password)
 		}
 	}
 }
@@ -178,7 +175,7 @@ func WithUnlockCode(uc string) Option {
 			return
 		}
 
-		r.setCustomValue("/UC", types.SpaceSep, uc)
+		r.setCustomValue("/UC", " ", uc)
 
 	}
 }
