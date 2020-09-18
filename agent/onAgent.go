@@ -1,9 +1,8 @@
 package agent
 
 import (
-	agent2 "github.com/khorevaa/go-v8platform/agent"
-	agent "github.com/khorevaa/go-v8platform/agent/client"
 	"github.com/khorevaa/go-v8platform/types"
+	agent "github.com/v8platform/agent"
 )
 
 type ClientPool struct {
@@ -21,7 +20,7 @@ type AgentPool struct {
 type RunningAgent struct {
 	connectionString string
 
-	agent2.AgentModeOptions
+	//agent.AgentModeOptions
 
 	// Признак запуска конфигуратора в режиме анета
 	Running bool
@@ -36,11 +35,11 @@ func (s RunningAgent) Stop() {
 
 }
 
-func (s RunningAgent) Start() error {
+func (s RunningAgent) Start() {
 
-	go func() {
-
-	}()
+	//go func() {
+	//
+	//}()
 
 }
 

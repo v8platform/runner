@@ -1,6 +1,6 @@
 package agent
 
-import agent "github.com/khorevaa/go-v8platform/agent/client"
+import agent "github.com/v8platform/agent"
 
 type ClientID string
 
@@ -12,9 +12,9 @@ type Pool struct {
 
 func (p *Pool) process() {
 
-	p.pool[id] = &Client{
-		ID: id,
-	}
+	//p.pool[id] = &Client{
+	//	ID: id,
+	//}
 
 	p.count++
 

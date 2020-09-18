@@ -1,7 +1,7 @@
 package runner
 
 import (
-	"github.com/khorevaa/go-v8platform/errors"
+	"github.com/v8platform/errors"
 	"github.com/v8platform/find"
 	"github.com/v8platform/runner/cmd"
 	"strings"
@@ -209,14 +209,12 @@ func getOptions(opts ...interface{}) *Options {
 
 	for _, opt := range opts {
 
-		switch opt.(type) {
+		switch o := opt.(type) {
 
 		case Options:
-			userOptions, _ := opt.(Options)
-			return &userOptions
+			return &o
 		case *Options:
-			userOptions, _ := opt.(*Options)
-			return userOptions
+			return o
 		}
 
 	}
