@@ -159,7 +159,7 @@ func WithCredentials(user, password string) Option {
 			return
 		}
 
-		r.setCustomValue("/U", " ", user)
+		r.setCustomValue("/N", " ", user)
 
 		if len(password) > 0 {
 			r.setCustomValue("/P", " ", password)
