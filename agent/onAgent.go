@@ -1,8 +1,8 @@
 package agent
 
 import (
-	"github.com/khorevaa/go-v8platform/types"
 	agent "github.com/v8platform/agent"
+	"github.com/v8platform/v8"
 )
 
 type ClientPool struct {
@@ -43,6 +43,6 @@ func (s RunningAgent) Start() {
 
 }
 
-func RunOnAgent(where types.InfoBase, what types.Command, opts ...interface{}) {
+func RunOnAgent(where v8.InfoBase, what v8.Command, opts ...interface{}) {
 
 }
