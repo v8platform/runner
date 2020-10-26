@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"github.com/khorevaa/go-v8platform/types"
 	agent "github.com/v8platform/agent"
 )
 
@@ -43,6 +42,6 @@ func (s RunningAgent) Start() {
 
 }
 
-func RunOnAgent(where types.InfoBase, what types.Command, opts ...interface{}) {
-
-}
+//func RunOnAgent(where runner.Infobase, what runner.Command, opts ...interface{}) {
+//
+//}

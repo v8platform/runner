@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"context"
-	//"github.com/khorevaa/v8platform/errors"
 )
 
 const CreateInfobase = "CREATEINFOBASE"
