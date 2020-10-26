@@ -2,7 +2,7 @@ package agent
 
 import (
 	agent "github.com/v8platform/agent"
-	"github.com/v8platform/v8"
+	"github.com/v8platform/runner"
 )
 
 type ClientPool struct {
@@ -43,6 +43,6 @@ func (s RunningAgent) Start() {
 
 }
 
-func RunOnAgent(where v8.InfoBase, what v8.Command, opts ...interface{}) {
+func RunOnAgent(where runner.Infobase, what runner.Command, opts ...interface{}) {
 
 }
