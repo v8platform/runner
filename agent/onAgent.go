@@ -42,6 +42,6 @@ func (s RunningAgent) Start() {
 
 }
 
-//func RunOnAgent(where agent.Infobase, what runner.Command, opts ...interface{}) {
+//func RunOnAgent(where runner.Infobase, what runner.Command, opts ...interface{}) {
 //
 //}
