@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"github.com/khorevaa/go-v8platform/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/v8platform/marshaler"
@@ -126,7 +125,7 @@ type CreateFileInfoBaseOptions struct {
 }
 
 func (d CreateInfoBaseOptions) Command() string {
-	return types.COMMAND_CREATEINFOBASE
+	return CreateInfobase
 }
 
 func (d CreateInfoBaseOptions) Check() error {
