@@ -13,15 +13,77 @@ const CreateInfobase = "CREATEINFOBASE"
 
 var defaultVersion = "8.3"
 
-type v8Runner struct {
-	Options   *Options
-	Where     Infobase
-	What      Command
-	ctx       context.Context
-	commandV8 string
+type PlatformRunner interface {
+
+	//CreateInfobase()
+	Run(ctx context.Context) error
+	Background(ctx context.Context) (Process, error)
+	Check() error
+	Args() []string
+	Opts() Options
 }
 
-func newRunner(ctx context.Context, where Infobase, what Command, opts ...interface{}) v8Runner {
+func NewPlatformRunner(where Infobase, what Command, opts ...interface{}) PlatformRunner {
+
+	runner := newRunner(where, what, opts...)
+
+	return &runner
+}
+
+type platformRunner struct {
+	Options *Options
+	Where   Infobase
+	What    Command
+	command string
+	args    []string
+}
+
+func (r *platformRunner) Run(ctx context.Context) error {
+
+	p, err := r.Background(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	return <-p.Wait()
+}
+
+func (r *platformRunner) Background(ctx context.Context) (Process, error) {
+
+	if err := r.Check(); err != nil {
+		return nil, err
+	}
+
+	p := r.background(ctx)
+
+	return p, nil
+}
+
+func (r *platformRunner) Check() error {
+
+	_, err := getV8Path(*r.Options)
+
+	if err != nil {
+		return err
+	}
+
+	return checkCommand(r.What)
+}
+
+func (r *platformRunner) Args() []string {
+
+	commandV8, _ := getV8Path(*r.Options)
+	return append([]string{
+		commandV8}, r.args...)
+
+}
+
+func (r *platformRunner) Opts() Options {
+	return *r.Options
+}
+
+func newRunner(where Infobase, what Command, opts ...interface{}) platformRunner {
 
 	options := defaultOptions()
 
@@ -34,11 +96,13 @@ func newRunner(ctx context.Context, where Infobase, what Command, opts ...interf
 
 	options.Options(o...)
 
-	r := v8Runner{
+	args := getCmdArgs(where, what, *options)
+
+	r := platformRunner{
 		Where:   where,
 		What:    what,
 		Options: options,
-		ctx:     ctx,
+		args:    args,
 	}
 
 	return r
@@ -46,46 +110,29 @@ func newRunner(ctx context.Context, where Infobase, what Command, opts ...interf
 
 func Run(where Infobase, what Command, opts ...interface{}) error {
 
-	ctx := context.Background()
+	return NewPlatformRunner(where, what, opts...).Run(context.Background())
 
-	p, err := Background(ctx, where, what, opts...)
-
-	if err != nil {
-		return err
-	}
-
-	return <-p.Wait()
 }
 
 func Background(ctx context.Context, where Infobase, what Command, opts ...interface{}) (Process, error) {
 
-	r := newRunner(ctx, where, what, opts...)
-
-	err := checkCommand(r.What)
-
-	if err != nil {
-		return nil, err
-	}
-
-	r.commandV8, err = getV8Path(*r.Options)
-
-	if err != nil {
-		return nil, err
-	}
-
-	p := r.run()
-
-	return p, nil
+	return NewPlatformRunner(where, what, opts...).Background(ctx)
 
 }
 
-func (r *v8Runner) run() Process {
+func (r *platformRunner) background(ctx context.Context) Process {
 
-	args := getCmdArgs(r.Where, r.What, *r.Options)
+	if r.Options.Context == nil {
+		r.Options.Context = ctx
+	}
 
-	runner := prepareRunner(r.ctx, r.commandV8, args, *r.Options)
+	cmdRunner := cmd.NewCmdRunner(r.command, r.args,
+		cmd.WithContext(r.Options.Context),
+		cmd.WithOutFilePath(r.Options.Out),
+		cmd.WithDumpResultFilePath(r.Options.DumpResult),
+	)
 
-	p := background(runner, r.ctx)
+	p := background(cmdRunner, ctx)
 
 	return p
 
@@ -151,21 +198,6 @@ func getCmdArgs(where Infobase, what Command, options Options) []string {
 	params.Append(options.Values()...)
 
 	return params.Values()
-}
-
-func prepareRunner(ctx context.Context, command string, args []string, options Options) Runner {
-
-	if options.Context == nil {
-		options.Context = ctx
-	}
-
-	r := cmd.NewCmdRunner(command, args,
-		cmd.WithContext(options.Context),
-		cmd.WithOutFilePath(options.Out),
-		cmd.WithDumpResultFilePath(options.DumpResult),
-	)
-
-	return r
 }
 
 func getV8Path(options Options) (string, error) {
