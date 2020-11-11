@@ -103,8 +103,12 @@ func (runner *CmdRunner) Run(signals <-chan os.Signal, ready chan<- struct{}) er
 
 			if errRun != nil {
 				outLog, _ := readOut(runner.outFilePath)
-				errorWithOut := errors.AddErrorContext(errRun, "out", outLog)
-				return errorWithOut
+				if len(outLog) > 0 {
+					return errors.Internal.Wrap(errRun, outLog)
+				}
+				
+				//errorWithOut := errors.AddErrorContext(errRun, "out", outLog)
+				return errRun
 			}
 			return errRun
 		case <-runner.ctx.Done():
