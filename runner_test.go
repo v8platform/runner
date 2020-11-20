@@ -6,7 +6,6 @@ import (
 	"github.com/v8platform/marshaler"
 	"io/ioutil"
 	"os"
-	"path"
 	"testing"
 )
 
@@ -30,15 +29,16 @@ func Test_runnerTestSuite(t *testing.T) {
 	suite.Run(t, new(v8runnerTestSuite))
 }
 
-func (t *v8runnerTestSuite) TestCmdRunner() {
+func (t *v8runnerTestSuite) TestCmdRunnerCreateInfobase() {
 
-	tempIB := NewTempIB()
+	runner := NewPlatformRunner(testInfoBase{}, CreateFileInfoBaseOptions{
+		File:     "./file_ib",
+		DBFormat: "8.3.8",
+	})
+	args := runner.Args()
+	t.r().Contains(args, CreateInfobase)
+	t.r().Contains(args, "File='./file_ib';DBFormat=8.3.8")
 
-	err := Run(tempIB, CreateFileInfoBaseOptions{})
-	t.r().NoError(err)
-	fileBaseCreated, err2 := Exists(path.Join(tempIB.File, "1Cv8.1CD"))
-	t.r().NoError(err2)
-	t.r().True(fileBaseCreated, "Файл базы должен быть создан")
 }
 
 func Exists(name string) (bool, error) {
@@ -72,21 +72,9 @@ type testInfoBase struct {
 	Locale string `v8:"Locale, optional, equal_sep" json:"locale"`
 }
 
-func (d testInfoBase) Path() string {
-
-	return d.File
-}
-
-func (d testInfoBase) Values() []string {
-
-	v, _ := marshaler.Marshal(d)
-	return v
-
-}
-
 func (d testInfoBase) ConnectionString() string {
 
-	return "/F " + d.File
+	return "File=" + d.File
 
 }
 

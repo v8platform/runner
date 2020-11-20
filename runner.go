@@ -178,14 +178,11 @@ func getCmdArgs(where Infobase, what Command, options Options) []string {
 
 	if isCreateInfobase(what) {
 
-		whereParams, whereValues := getConnectionsStringParams(where.Values())
-		whatParams, whatValues := getConnectionsStringParams(what.Values())
+		connectionStringParams, values := getConnectionsStringParams(what.Values())
 
-		connectionString := joinConnectionStringParams(whatParams, whereParams)
-
+		connectionString := strings.Join(connectionStringParams, ";")
 		params.Append(connectionString)
-		params.Append(whatValues...)
-		params.Append(whereValues...)
+		params.Append(values...)
 
 	} else {
 

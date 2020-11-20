@@ -18,13 +18,11 @@ type Param interface {
 }
 
 type Infobase interface {
-	Path() string
 	// Возвращает
 	// - /IBConnectionString <СтрокаПодключения>
 	// - /F<ПУтьКБазе>
 	// - /S<ПутьКСервернойБазе>
 	ConnectionString() string
-	Values() []string
 }
 
 type Command interface {
