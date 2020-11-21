@@ -106,12 +106,15 @@ func (runner *CmdRunner) Run(signals <-chan os.Signal, ready chan<- struct{}) er
 				if len(outLog) > 0 {
 					return errors.Internal.Wrap(errRun, outLog)
 				}
-				
+
 				//errorWithOut := errors.AddErrorContext(errRun, "out", outLog)
 				return errRun
 			}
 			return errRun
 		case <-runner.ctx.Done():
+
+			_ = runner.cmd.Process.Signal(os.Interrupt)
+
 			return runner.ctx.Err()
 		}
 	}
