@@ -11,6 +11,7 @@ changelog:
       - '^test:'
       - Merge pull request
       - Merge branch
+      - Finish
 build:
   skip: true
 release:
