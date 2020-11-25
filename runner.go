@@ -55,6 +55,14 @@ func (r *platformRunner) Background(ctx context.Context) (Process, error) {
 		return nil, err
 	}
 
+	var err error
+
+	r.command, err = getV8Path(*r.Options)
+
+	if err != nil {
+		return nil, err
+	}
+
 	p := r.background(ctx)
 
 	return p, nil

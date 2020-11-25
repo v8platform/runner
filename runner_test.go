@@ -1,6 +1,8 @@
 package runner
 
 import (
+	"context"
+	"fmt"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/v8platform/marshaler"
@@ -38,6 +40,28 @@ func (t *v8runnerTestSuite) TestCmdRunnerCreateInfobase() {
 	args := runner.Args()
 	t.r().Contains(args, CreateInfobase)
 	t.r().Contains(args, "File='./file_ib';DBFormat=8.3.8")
+
+}
+
+func (t *v8runnerTestSuite) TestCmdRunnerV8path() {
+
+	if testing.Short() {
+		t.T().Skip("skipping test in short mode.")
+	}
+
+	path, _ := ioutil.TempDir("", "1c_DB_")
+
+	runner := NewPlatformRunner(testInfoBase{}, CreateFileInfoBaseOptions{
+		File: path,
+	})
+
+	args := runner.Args()
+	t.r().Contains(args, CreateInfobase)
+	t.r().Contains(args, fmt.Sprintf("File='%s'", path))
+
+	err := runner.Run(context.Background())
+
+	t.r().NoError(err, "no error command")
 
 }
 
